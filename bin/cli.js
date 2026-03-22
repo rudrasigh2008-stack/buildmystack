@@ -11,6 +11,69 @@ const __dirname = path.dirname(__filename);
 
 const packageJson = fs.readJsonSync(path.join(__dirname, "../package.json"));
 
+async function mergePackageJson(targetPath, newDeps) {
+  let targetPkgPath = path.join(targetPath, "client", "package.json");
+  if (!fs.existsSync(targetPkgPath)) {
+    targetPkgPath = path.join(targetPath, "package.json");
+  }
+
+  const pkg = await fs.readJson(targetPkgPath);
+
+  if (newDeps.dependencies) {
+    pkg.dependencies = { ...pkg.dependencies, ...newDeps.dependencies };
+  }
+
+  if (newDeps.devDependencies) {
+    pkg.devDependencies = {
+      ...pkg.devDependencies,
+      ...newDeps.devDependencies,
+    };
+  }
+
+  await fs.writeJson(targetPkgPath, pkg, { spaces: 2 });
+}
+
+async function copyModuleFiles(modulePath, targetPath, files) {
+  for (const file of files) {
+    const srcPath = path.join(modulePath, file.from);
+    const destPath = path.join(targetPath, file.to);
+    await fs.ensureDir(path.dirname(destPath));
+    await fs.copy(srcPath, destPath, { overwrite: true });
+  }
+}
+
+async function applyModule(targetPath, moduleCategory, moduleName) {
+  const modulePath = path.join(
+    __dirname,
+    `../templates/modules/${moduleCategory}/${moduleName}`,
+  );
+  const moduleJsonPath = path.join(modulePath, "module.json");
+
+  if (!fs.existsSync(moduleJsonPath)) {
+    console.error(`Module metadata not found for ${moduleName}`);
+    return;
+  }
+
+  console.log(`Applying module: ${moduleName}...`);
+  const moduleConfig = await fs.readJson(moduleJsonPath);
+
+  if (moduleConfig.files && moduleConfig.files.length > 0) {
+    await copyModuleFiles(modulePath, targetPath, moduleConfig.files);
+  }
+
+  if (moduleConfig.dependencies) {
+    await mergePackageJson(targetPath, moduleConfig.dependencies);
+  }
+}
+
+async function applyModules(targetPath, selectedModules) {
+  for (const mod of selectedModules) {
+    if (mod.name && mod.name !== "basic-css") {
+      await applyModule(targetPath, mod.category, mod.name);
+    }
+  }
+}
+
 const program = new Command();
 
 program
@@ -51,7 +114,7 @@ program
         type: "list",
         name: "styling",
         message: "Select your styling:",
-        choices: ["basic", "tailwind"],
+        choices: ["basic-css", "tailwind"],
         when: (answers) => answers.stack === "react-express-mongo",
       });
 
@@ -75,22 +138,27 @@ program
 
       console.log(`\nCreating full-stack project in ${targetPath}...\n`);
 
-      let selectedTemplate = answers.stack;
-      if (answers.stack === "react-express-mongo") {
-        selectedTemplate = `react-express-mongo-${answers.styling}`;
-      }
-
-      // Path to the template
-      const templatePath = path.join(__dirname, `../templates/${selectedTemplate}`);
+      // Path to the base template
+      const templatePath = path.join(
+        __dirname,
+        `../templates/base/${answers.stack}`,
+      );
 
       const pkgManager = process.env.npm_config_user_agent?.includes("yarn")
         ? "yarn"
         : process.env.npm_config_user_agent?.includes("pnpm")
-        ? "pnpm"
-        : "npm";
+          ? "pnpm"
+          : "npm";
 
-      // 1. Copy template folder into new project directory
+      // 1. Copy base template folder into new project directory
       await fs.copy(templatePath, targetPath);
+
+      // Apply modules dynamically
+      const modulesToApply = [];
+      if (answers.styling && answers.styling !== "basic-css") {
+        modulesToApply.push({ category: "styling", name: answers.styling });
+      }
+      await applyModules(targetPath, modulesToApply);
 
       // 2. Rename project in root package.json
       const rootPackageJsonPath = path.join(targetPath, "package.json");
@@ -105,18 +173,23 @@ program
         envExamplePath = path.join(targetPath, ".env.example");
         envPath = path.join(targetPath, ".env");
       }
-      
+
       if (fs.existsSync(envExamplePath)) {
         await fs.move(envExamplePath, envPath);
       }
 
       if (options.install) {
         console.log(`Installing root dependencies using ${pkgManager}...`);
-        await execa(pkgManager, ["install"], { cwd: targetPath, stdio: "inherit" });
+        await execa(pkgManager, ["install"], {
+          cwd: targetPath,
+          stdio: "inherit",
+        });
 
         const serverPath = path.join(targetPath, "server");
         if (fs.existsSync(serverPath)) {
-          console.log(`\nInstalling server dependencies using ${pkgManager}...`);
+          console.log(
+            `\nInstalling server dependencies using ${pkgManager}...`,
+          );
           await execa(pkgManager, ["install"], {
             cwd: serverPath,
             stdio: "inherit",
@@ -125,7 +198,9 @@ program
 
         const clientPath = path.join(targetPath, "client");
         if (fs.existsSync(clientPath)) {
-          console.log(`\nInstalling client dependencies using ${pkgManager}...`);
+          console.log(
+            `\nInstalling client dependencies using ${pkgManager}...`,
+          );
           await execa(pkgManager, ["install"], {
             cwd: clientPath,
             stdio: "inherit",

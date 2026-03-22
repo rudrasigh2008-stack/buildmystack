@@ -1,0 +1,25 @@
+{
+  "name": "tailwind",
+  "type": "styling",
+  "dependencies": {
+    "devDependencies": {
+      "tailwindcss": "^3.4.0",
+      "postcss": "^8.4.0",
+      "autoprefixer": "^10.4.0"
+    }
+  },
+  "files": [
+    {
+      "from": "tailwind.config.js",
+      "to": "client/tailwind.config.js"
+    },
+    {
+      "from": "postcss.config.js",
+      "to": "client/postcss.config.js"
+    },
+    {
+      "from": "src/index.css",
+      "to": "client/src/index.css"
+    }
+  ]
+}
