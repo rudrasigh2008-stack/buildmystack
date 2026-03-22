@@ -47,6 +47,13 @@ program
         message: "Select your stack:",
         choices: ["react-express-mongo", "nextjs-mongo"],
       });
+      prompts.push({
+        type: "list",
+        name: "styling",
+        message: "Select your styling:",
+        choices: ["basic", "tailwind"],
+        when: (answers) => answers.stack === "react-express-mongo",
+      });
 
       const answers = await inquirer.prompt(prompts);
       if (!name) {
@@ -68,8 +75,13 @@ program
 
       console.log(`\nCreating full-stack project in ${targetPath}...\n`);
 
+      let selectedTemplate = answers.stack;
+      if (answers.stack === "react-express-mongo") {
+        selectedTemplate = `react-express-mongo-${answers.styling}`;
+      }
+
       // Path to the template
-      const templatePath = path.join(__dirname, `../templates/${answers.stack}`);
+      const templatePath = path.join(__dirname, `../templates/${selectedTemplate}`);
 
       const pkgManager = process.env.npm_config_user_agent?.includes("yarn")
         ? "yarn"
