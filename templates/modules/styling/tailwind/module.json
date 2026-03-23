@@ -21,5 +21,12 @@
       "from": "src/index.css",
       "to": "client/src/index.css"
     }
+  ],
+  "inject": [
+    {
+      "type": "import",
+      "file": "client/src/main.jsx",
+      "value": "import \"./index.css\";"
+    }
   ]
 }

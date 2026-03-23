@@ -11,36 +11,7 @@ const __dirname = path.dirname(__filename);
 
 const packageJson = fs.readJsonSync(path.join(__dirname, "../package.json"));
 
-async function mergePackageJson(targetPath, newDeps) {
-  let targetPkgPath = path.join(targetPath, "client", "package.json");
-  if (!fs.existsSync(targetPkgPath)) {
-    targetPkgPath = path.join(targetPath, "package.json");
-  }
-
-  const pkg = await fs.readJson(targetPkgPath);
-
-  if (newDeps.dependencies) {
-    pkg.dependencies = { ...pkg.dependencies, ...newDeps.dependencies };
-  }
-
-  if (newDeps.devDependencies) {
-    pkg.devDependencies = {
-      ...pkg.devDependencies,
-      ...newDeps.devDependencies,
-    };
-  }
-
-  await fs.writeJson(targetPkgPath, pkg, { spaces: 2 });
-}
-
-async function copyModuleFiles(modulePath, targetPath, files) {
-  for (const file of files) {
-    const srcPath = path.join(modulePath, file.from);
-    const destPath = path.join(targetPath, file.to);
-    await fs.ensureDir(path.dirname(destPath));
-    await fs.copy(srcPath, destPath, { overwrite: true });
-  }
-}
+import { mergePackageJson, copyModuleFiles, applyInjections } from "./utils/moduleHelpers.js";
 
 async function applyModule(targetPath, moduleCategory, moduleName) {
   const modulePath = path.join(
@@ -63,6 +34,10 @@ async function applyModule(targetPath, moduleCategory, moduleName) {
 
   if (moduleConfig.dependencies) {
     await mergePackageJson(targetPath, moduleConfig.dependencies);
+  }
+
+  if (moduleConfig.inject && moduleConfig.inject.length > 0) {
+    await applyInjections(targetPath, moduleConfig.inject);
   }
 }
 
