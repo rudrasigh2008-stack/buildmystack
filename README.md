@@ -6,7 +6,7 @@
 ![npm version](https://img.shields.io/npm/v/buildmystack?color=blue&label=npm)
 ![license](https://img.shields.io/npm/l/buildmystack)
 
-<img src="https://res.cloudinary.com/dcauyzkfh/image/upload/v1774253254/Thumbnail_s1kohi.jpg" alt="thumbnail"/>
+<!-- <img src="https://res.cloudinary.com/dcauyzkfh/image/upload/v1774253254/Thumbnail_s1kohi.jpg" alt="thumbnail"/> -->
 
 ## Why buildmystack?
 
@@ -72,6 +72,17 @@ my-app/
 ├── .gitignore
 ├── package.json     # Root package.json running concurrently
 ```
+
+## Changelog
+
+Keep track of new features, bug fixes, and improvements in each version of `buildmystack`.
+
+### 0.2.0-beta.0 (Latest)
+
+- **Feature**: Completely modularized Database and Auth setups for React-Express and Next.js templates.
+- **Feature**: Added PostgreSQL (Sequelize) database support alongside MongoDB.
+- **Feature**: Added dynamic module dependency resolution (`requires` field) and advanced file injection system.
+- **Bug Fix**: Fixed code injection parsing issues and improved dependency extraction paths.
 
 ## Contributing
 

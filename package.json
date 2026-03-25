@@ -1,6 +1,6 @@
 {
   "name": "buildmystack",
-  "version": "0.1.0-beta.1",
+  "version": "0.2.0-beta.0",
   "description": "Zero-config CLI to generate production-ready full-stack apps with frontend, backend, auth, and database setup in seconds.",
   "keywords": [
     "cli",
