@@ -1,0 +1,42 @@
+{
+  "name": "nextjs-basic",
+  "category": "auth",
+  "dependencies": {
+    "root": {
+      "dependencies": {
+        "bcryptjs": "^2.4.3",
+        "jsonwebtoken": "^9.0.2"
+      }
+    }
+  },
+  "files": [
+    {
+      "from": "app/api",
+      "to": "app/api"
+    },
+    {
+      "from": "app/login",
+      "to": "app/login"
+    },
+    {
+      "from": "app/register",
+      "to": "app/register"
+    },
+    {
+      "from": "app/dashboard",
+      "to": "app/dashboard"
+    },
+    {
+      "from": "middleware.js",
+      "to": "middleware.js"
+    },
+    {
+      "from": "components/Navbar.jsx",
+      "to": "components/Navbar.jsx"
+    },
+    {
+      "from": "app/layout.js",
+      "to": "app/layout.js"
+    }
+  ]
+}

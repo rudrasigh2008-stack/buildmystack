@@ -1,0 +1,47 @@
+{
+  "name": "postgres",
+  "category": "database",
+  "dependencies": {
+    "server": {
+      "dependencies": {
+        "pg": "^8.11.5",
+        "pg-hstore": "^2.3.4",
+        "sequelize": "^6.37.3"
+      }
+    }
+  },
+  "files": [
+    {
+      "from": "server/src/config/db.js",
+      "to": "server/src/config/db.js"
+    },
+    {
+      "from": "server/src/models/User.js",
+      "to": "server/src/models/User.js"
+    }
+  ],
+  "inject": [
+    {
+      "type": "import",
+      "file": "server/src/server.js",
+      "value": "import connectDB from './config/db.js';"
+    },
+    {
+      "type": "code",
+      "file": "server/src/server.js",
+      "value": "await connectDB();"
+    }
+  ],
+  "requires": [
+    {
+      "category": "auth",
+      "name": "basic"
+    }
+  ],
+  "env": [
+    {
+      "key": "DATABASE_URL",
+      "value": "postgres://postgres.[YOUR-PROJECT-REF]:[YOUR-PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres"
+    }
+  ]
+}

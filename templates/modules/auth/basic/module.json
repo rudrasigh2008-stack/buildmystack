@@ -1,0 +1,68 @@
+{
+  "name": "basic",
+  "category": "auth",
+  "dependencies": {
+    "server": {
+      "dependencies": {
+        "bcryptjs": "^2.4.3",
+        "jsonwebtoken": "^9.0.2"
+      }
+    }
+  },
+  "files": [
+    {
+      "from": "server/src/controllers/authController.js",
+      "to": "server/src/controllers/authController.js"
+    },
+    {
+      "from": "server/src/middleware/authMiddleware.js",
+      "to": "server/src/middleware/authMiddleware.js"
+    },
+    {
+      "from": "server/src/routes/authRoutes.js",
+      "to": "server/src/routes/authRoutes.js"
+    },
+    {
+      "from": "client/src/hooks/useAuth.js",
+      "to": "client/src/hooks/useAuth.js"
+    },
+    {
+      "from": "client/src/pages/Login.jsx",
+      "to": "client/src/pages/Login.jsx"
+    },
+    {
+      "from": "client/src/pages/Register.jsx",
+      "to": "client/src/pages/Register.jsx"
+    },
+    {
+      "from": "client/src/pages/Dashboard.jsx",
+      "to": "client/src/pages/Dashboard.jsx"
+    },
+    {
+      "from": "client/src/routes/AppRoutes.jsx",
+      "to": "client/src/routes/AppRoutes.jsx"
+    },
+    {
+      "from": "client/src/components/Navbar.jsx",
+      "to": "client/src/components/Navbar.jsx"
+    }
+  ],
+  "inject": [
+    {
+      "type": "import",
+      "file": "server/src/app.js",
+      "value": "import authRoutes from './routes/authRoutes.js';"
+    },
+    {
+      "type": "code",
+      "file": "server/src/app.js",
+      "value": "app.use('/api/auth', authRoutes);"
+    }
+  ],
+  "env": [
+    {
+      "key": "JWT_SECRET",
+      "value": "secret123"
+    }
+  ]
+}

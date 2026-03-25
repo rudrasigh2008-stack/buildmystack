@@ -1,0 +1,33 @@
+{
+  "name": "nextjs-mongo",
+  "category": "database",
+  "dependencies": {
+    "root": {
+      "dependencies": {
+        "mongoose": "^8.3.2"
+      }
+    }
+  },
+  "files": [
+    {
+      "from": "lib/db.js",
+      "to": "lib/db.js"
+    },
+    {
+      "from": "models/User.js",
+      "to": "models/User.js"
+    }
+  ],
+  "requires": [
+    {
+      "category": "auth",
+      "name": "nextjs-basic"
+    }
+  ],
+  "env": [
+    {
+      "key": "MONGO_URI",
+      "value": "mongodb://localhost:27017/buildmystack"
+    }
+  ]
+}

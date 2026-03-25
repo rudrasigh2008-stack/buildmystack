@@ -1,0 +1,45 @@
+{
+  "name": "mongo",
+  "type": "database",
+  "dependencies": {
+    "server": {
+      "dependencies": {
+        "mongoose": "^8.0.0"
+      }
+    }
+  },
+  "files": [
+    {
+      "from": "server/src/config/db.js",
+      "to": "server/src/config/db.js"
+    },
+    {
+      "from": "server/src/models/User.js",
+      "to": "server/src/models/User.js"
+    }
+  ],
+  "inject": [
+    {
+      "type": "import",
+      "file": "server/src/server.js",
+      "value": "import connectDB from './config/db.js';"
+    },
+    {
+      "type": "code",
+      "file": "server/src/server.js",
+      "value": "await connectDB();"
+    }
+  ],
+  "requires": [
+    {
+      "category": "auth",
+      "name": "basic"
+    }
+  ],
+  "env": [
+    {
+      "key": "MONGO_URI",
+      "value": "mongodb://localhost:27017/buildmystack"
+    }
+  ]
+}

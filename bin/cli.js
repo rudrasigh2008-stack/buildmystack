@@ -11,7 +11,12 @@ const __dirname = path.dirname(__filename);
 
 const packageJson = fs.readJsonSync(path.join(__dirname, "../package.json"));
 
-import { mergePackageJson, copyModuleFiles, applyInjections } from "./utils/moduleHelpers.js";
+import {
+  mergePackageJson,
+  copyModuleFiles,
+  applyInjections,
+  applyEnv,
+} from "./utils/moduleHelpers.js";
 
 async function applyModule(targetPath, moduleCategory, moduleName) {
   const modulePath = path.join(
@@ -21,14 +26,14 @@ async function applyModule(targetPath, moduleCategory, moduleName) {
   const moduleJsonPath = path.join(modulePath, "module.json");
 
   if (!fs.existsSync(moduleJsonPath)) {
-    console.error(`Module metadata not found for ${moduleName}`);
+    console.error(`❌ Module metadata not found for ${moduleName}`);
     return;
   }
 
-  console.log(`Applying module: ${moduleName}...`);
+  console.log(`⚙️ Applying ${moduleCategory} module: ${moduleName}`);
   const moduleConfig = await fs.readJson(moduleJsonPath);
 
-  if (moduleConfig.files && moduleConfig.files.length > 0) {
+  if (moduleConfig.files?.length) {
     await copyModuleFiles(modulePath, targetPath, moduleConfig.files);
   }
 
@@ -36,16 +41,47 @@ async function applyModule(targetPath, moduleCategory, moduleName) {
     await mergePackageJson(targetPath, moduleConfig.dependencies);
   }
 
-  if (moduleConfig.inject && moduleConfig.inject.length > 0) {
+  if (moduleConfig.inject?.length) {
     await applyInjections(targetPath, moduleConfig.inject);
+  }
+
+  if (moduleConfig.env?.length) {
+    await applyEnv(targetPath, moduleConfig.env);
   }
 }
 
 async function applyModules(targetPath, selectedModules) {
-  for (const mod of selectedModules) {
-    if (mod.name && mod.name !== "basic-css") {
-      await applyModule(targetPath, mod.category, mod.name);
+  const allModules = [];
+  const added = new Set();
+
+  const addModule = async (category, name) => {
+    const key = `${category}/${name}`;
+    if (added.has(key)) return;
+    added.add(key);
+
+    const moduleJsonPath = path.join(
+      __dirname,
+      `../templates/modules/${category}/${name}/module.json`,
+    );
+    if (fs.existsSync(moduleJsonPath)) {
+      const moduleConfig = await fs.readJson(moduleJsonPath);
+      if (moduleConfig.requires && Array.isArray(moduleConfig.requires)) {
+        for (const req of moduleConfig.requires) {
+          await addModule(req.category, req.name);
+        }
+      }
     }
+    allModules.push({ category, name });
+  };
+
+  for (const mod of selectedModules) {
+    if (mod?.name) {
+      await addModule(mod.category, mod.name);
+    }
+  }
+
+  for (const mod of allModules) {
+    await applyModule(targetPath, mod.category, mod.name);
   }
 }
 
@@ -53,7 +89,9 @@ const program = new Command();
 
 program
   .name(packageJson.name)
-  .description("Scaffold a complete React+Express+MongoDB application")
+  .description(
+    "Scaffold a complete multiple stack application in just one command.",
+  )
   .version(packageJson.version);
 
 program
@@ -83,17 +121,27 @@ program
         type: "list",
         name: "stack",
         message: "Select your stack:",
-        choices: ["react-express-mongo", "nextjs-mongo"],
+        choices: ["react-express", "nextjs"],
       });
       prompts.push({
         type: "list",
         name: "styling",
         message: "Select your styling:",
         choices: ["basic-css", "tailwind"],
-        when: (answers) => answers.stack === "react-express-mongo",
+        when: (answers) => answers.stack === "react-express",
+      });
+      prompts.push({
+        type: "list",
+        name: "database",
+        message: "Select database (+ JWT auth):",
+        choices: (answers) =>
+          answers.stack === "nextjs"
+            ? ["mongo", "none"]
+            : ["mongo", "postgres", "none"],
       });
 
       const answers = await inquirer.prompt(prompts);
+
       if (!name) {
         name = answers.projectName;
         if (!/^[a-zA-Z0-9-_]+$/.test(name)) {
@@ -131,7 +179,17 @@ program
       // Apply modules dynamically
       const modulesToApply = [];
       if (answers.styling && answers.styling !== "basic-css") {
-        modulesToApply.push({ category: "styling", name: answers.styling });
+        modulesToApply.push({
+          category: "styling",
+          name: answers.styling,
+        });
+      }
+      if (answers.database && answers.database !== "none") {
+        const prefix = answers.stack === "nextjs" ? "nextjs-" : "";
+        modulesToApply.push({
+          category: "database",
+          name: `${prefix}${answers.database}`,
+        });
       }
       await applyModules(targetPath, modulesToApply);
 
@@ -153,6 +211,7 @@ program
         await fs.move(envExamplePath, envPath);
       }
 
+      // Install Dependencies
       if (options.install) {
         console.log(`Installing root dependencies using ${pkgManager}...`);
         await execa(pkgManager, ["install"], {
